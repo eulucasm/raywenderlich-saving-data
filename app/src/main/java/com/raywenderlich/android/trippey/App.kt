@@ -36,8 +36,12 @@ package com.raywenderlich.android.trippey
 
 import android.app.Application
 import android.content.Context
+import com.google.gson.Gson
+import com.raywenderlich.android.trippey.files.FilesHelper
+import com.raywenderlich.android.trippey.files.FilesHelperImpl
 import com.raywenderlich.android.trippey.repository.TrippeyRepository
 import com.raywenderlich.android.trippey.repository.TrippeyRepositoryImpl
+import java.io.File
 
 class App : Application() {
 
@@ -51,7 +55,29 @@ class App : Application() {
       instance.getSharedPreferences(KEY_PREFERENCES, Context.MODE_PRIVATE)
     }
 
-    val repository: TrippeyRepository by lazy { TrippeyRepositoryImpl(sharedPreferences) }
+    private val filesHelper:FilesHelper by lazy{
+      FilesHelperImpl(getFilesDirectory())
+    }
+
+    private fun getFilesDirectory(): File{
+      val directory = File(instance.getExternalFilesDir(null), "")
+
+      if (!directory.exists()){
+        directory.mkdirs()
+      }
+
+      return directory
+    }
+
+    private val gson by lazy{ Gson() }
+
+    val repository: TrippeyRepository by lazy {
+      TrippeyRepositoryImpl(
+        sharedPreferences,
+        filesHelper,
+        gson
+      )
+    }
   }
 
   override fun onCreate() {
