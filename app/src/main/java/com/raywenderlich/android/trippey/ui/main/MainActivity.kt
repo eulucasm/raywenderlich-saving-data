@@ -54,9 +54,8 @@ class MainActivity : AppCompatActivity() {
 
   private val adapter by lazy { TripAdapter(::onItemLongTapped, ::onItemTapped) }
   private val repository by lazy { App.repository }
-  private val localPreferences by lazy{
-    getPreferences(Context.MODE_PRIVATE)
-  }
+
+  private val localPreferences by lazy { getPreferences(Context.MODE_PRIVATE) }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     setTheme(R.style.AppTheme)
@@ -92,6 +91,16 @@ class MainActivity : AppCompatActivity() {
     adapter.setData(repository.getTrips(), getSortOption())
   }
 
+  private fun getSortOption(): SortOption {
+    return getSortOptionFromName(localPreferences.getString(KEY_SORT_OPTION, "") ?: "")
+  }
+
+  private fun saveSortOption(sortOption: SortOption) {
+    localPreferences.edit()
+      .putString(KEY_SORT_OPTION, sortOption.name)
+      .apply()
+  }
+
   override fun onResume() {
     super.onResume()
 
@@ -105,18 +114,8 @@ class MainActivity : AppCompatActivity() {
       onPositiveAction = {
         repository.deleteTrip(trip.id)
 
-        adapter.setData(repository.getTrips(), repository.getSortOption())
+        refreshData()
       })
-  }
-
-  private fun getSortOption():SortOption{
-    return getSortOptionFromName(localPreferences.getString(KEY_SORT_OPTION,"")?: "")
-  }
-
-  private fun saveSortOption(sortOption: SortOption){
-      localPreferences.edit()
-          .putString(KEY_SORT_OPTION, sortOption.name)
-          .apply()
   }
 
 

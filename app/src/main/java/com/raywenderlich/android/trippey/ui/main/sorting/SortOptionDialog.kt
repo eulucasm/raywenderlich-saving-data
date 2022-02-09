@@ -43,15 +43,19 @@ import androidx.fragment.app.DialogFragment
 import com.raywenderlich.android.trippey.App
 import com.raywenderlich.android.trippey.R
 import com.raywenderlich.android.trippey.model.*
-import com.raywenderlich.android.trippey.repository.TrippeyRepositoryImpl.Companion.KEY_SORT_OPTION
+import com.raywenderlich.android.trippey.repository.TrippeyRepositoryImpl
 import kotlinx.android.synthetic.main.dialog_sorting.*
 
 class SortOptionDialog(
   private val onSortOptionsSelected: (SortOption) -> Unit
 ) : DialogFragment() {
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                            savedInstanceState: Bundle?): View? {
+  private val repository by lazy { App.repository }
+
+  override fun onCreateView(
+    inflater: LayoutInflater, container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View? {
     return inflater.inflate(R.layout.dialog_sorting, container, false)
   }
 
@@ -67,29 +71,36 @@ class SortOptionDialog(
 
     val currentSort = getSortOption()
 
-    sortOptions.check(when (currentSort) {
-      ByName -> R.id.sortByTitle
-      ByNumberOfLocations -> R.id.sortByNumberOfLocations
-      else -> R.id.noSort
-    })
+    sortOptions.check(
+      when (currentSort) {
+        ByName -> R.id.sortByTitle
+        ByNumberOfLocations -> R.id.sortByNumberOfLocations
+        else -> R.id.noSort
+      }
+    )
   }
 
   private fun getSortOption(): SortOption {
     val localPreferences = activity?.getPreferences(Context.MODE_PRIVATE)
 
     return getSortOptionFromName(
-      localPreferences?.getString(KEY_SORT_OPTION, "") ?: ""
+      localPreferences?.getString(
+        TrippeyRepositoryImpl.KEY_SORT_OPTION,
+        ""
+      ) ?: ""
     )
   }
 
   private fun onSortOptionSelected() {
     val selectedOption = sortOptions.checkedRadioButtonId
 
-    onSortOptionsSelected(when (selectedOption) {
-      R.id.sortByNumberOfLocations -> ByNumberOfLocations
-      R.id.sortByTitle -> ByName
-      else -> None
-    })
+    onSortOptionsSelected(
+      when (selectedOption) {
+        R.id.sortByNumberOfLocations -> ByNumberOfLocations
+        R.id.sortByTitle -> ByName
+        else -> None
+      }
+    )
 
     dismissAllowingStateLoss()
   }
@@ -101,7 +112,9 @@ class SortOptionDialog(
 
   override fun onStart() {
     super.onStart()
-    dialog?.window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-      WindowManager.LayoutParams.WRAP_CONTENT)
+    dialog?.window?.setLayout(
+      WindowManager.LayoutParams.MATCH_PARENT,
+      WindowManager.LayoutParams.WRAP_CONTENT
+    )
   }
 }

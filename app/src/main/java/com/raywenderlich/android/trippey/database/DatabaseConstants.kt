@@ -1,3 +1,5 @@
+package com.raywenderlich.android.trippey.database
+
 /*
  * Copyright (c) 2020 Razeware LLC
  *
@@ -31,54 +33,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+object DatabaseConstants {
 
-package com.raywenderlich.android.trippey.repository
+  const val DATABASE_NAME = "Trippey"
+  const val DATABASE_VERSION = 1
 
-import android.content.SharedPreferences
-import com.google.gson.Gson
-import com.raywenderlich.android.trippey.files.FilesHelper
-import com.raywenderlich.android.trippey.model.SortOption
-import com.raywenderlich.android.trippey.model.Trip
-import com.raywenderlich.android.trippey.model.getSortOptionFromName
+  /**
+   * Table names and column names for the database model.
+   */
 
-class TrippeyRepositoryImpl(
-  private val sharedPreferences: SharedPreferences,
-  private val filesHelper: FilesHelper,
-  private val gson: Gson
-) : TrippeyRepository {
+  const val TRIP_TABLE_NAME = "trips"
+  const val COLUMN_ID = "id"
+  const val COLUMN_TITLE = "title"
+  const val COLUMN_COUNTRY = "country"
+  const val COLUMN_DETAILS = "details"
+  const val COLUMN_IMAGE_URL = "imageUrl"
+  const val COLUMN_LOCATIONS = "locations"
 
-  companion object {
-    const val KEY_SORT_OPTION = "sort_option"
-  }
+  /**
+   * Queries to help out with database setup.
+   * */
 
-  override fun saveTrip(trip: Trip) {
-    filesHelper.saveData(trip.id, gson.toJson(trip))
-  }
+  const val SQL_CREATE_ENTRIES = """
+    CREATE TABLE $TRIP_TABLE_NAME
+    ($COLUMN_ID TEXT PRIMARY KEY,
+     $COLUMN_TITLE TEXT NOT NULL,
+     $COLUMN_COUNTRY TEXT NOT NULL DEFAULT '',
+     $COLUMN_DETAILS TEXT NOT NULL,
+     $COLUMN_IMAGE_URL TEXT)
+  """
 
-  override fun updateTrip(trip: Trip) {
-    deleteTrip(trip.id)
-    saveTrip(trip)
-  }
-
-  override fun deleteTrip(tripId: String) {
-    filesHelper.deleteData(tripId)
-  }
-
-  override fun getTrips(): List<Trip> {
-    val tripFiles = filesHelper.getData()
-
-    return tripFiles.map { gson.fromJson(it.readText(), Trip::class.java) }
-  }
-
-  override fun getSortOption(): SortOption {
-    val storedOption = sharedPreferences.getString(KEY_SORT_OPTION, "") ?: ""
-
-    return getSortOptionFromName(storedOption)
-  }
-
-  override fun saveSortOption(sortOption: SortOption) {
-    sharedPreferences.edit()
-      .putString(KEY_SORT_OPTION, sortOption.name)
-      .apply()
-  }
+  const val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS $TRIP_TABLE_NAME"
 }
